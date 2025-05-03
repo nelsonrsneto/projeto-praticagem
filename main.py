@@ -2,10 +2,18 @@ from playwright.sync_api import sync_playwright
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import time
+import os
+import json
 
-# Configuração do acesso ao Google Sheets
+# Configuração do acesso ao Google Sheets via variável de ambiente
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("credenciais.json", scope)
+creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
+
+if not creds_json:
+    raise Exception("A variável de ambiente GOOGLE_CREDENTIALS_JSON não está definida.")
+
+creds_dict = json.loads(creds_json)
+creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
 
 # Abrir a planilha e selecionar a aba ativa
